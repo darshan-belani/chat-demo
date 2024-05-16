@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,11 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::post('/chat/send-message', [App\Http\Controllers\HomeController::class, 'store'])->name('chat.send');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::post('/chat/send-message', [HomeController::class, 'store'])->name('chat.send');
+Route::post('/chat/get-message', [HomeController::class, 'getMessage'])->name('getMessage');
+
+Route::get('/user-chat', [HomeController::class, 'index'])->name('home');
+Route::post('/user/chat/send-message', [HomeController::class, 'messageStore'])->name('user.chat.send');
+Route::post('/user/chat/get-message', [HomeController::class, 'getUserMessage'])->name('user.getMessage');
 

@@ -1,129 +1,72 @@
 @extends('layouts.app')
 
 @section('content')
-    <style>
-        .left-section {
-            background-color: #2d3748;
-            height: 500px;
-            color: white
-        }
-
-        .userlist {
-            background-color: blue;
-            height: 59px;
-            margin-top: 26px;
-            text-align: center;
-            border-radius: 8px;
-        }
-
-        .userlist span {
-            top: 18px;
-            font-weight: bold;
-            position: relative;
-        }
-
-        .right-section {
-            background-color: #718096;
-            height: 500px;
-            color: white
-        }
-
-        .message-list {
-            margin-top: 50px;
-        }
-
-        .message-box {
-            width: 78%
-        }
-
-        .send-button {
-            width: 100px;
-            margin-left: 12px;
-        }
-    </style>
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">{{ __('Dashboard') }}</div>
-                    <div class="container">
-                        <div class="row">
-
-                            <div class="col-xs-12 col-md-4 left-section">
-                                @foreach($userData as $key => $value )
-                                    <div class="userlist">
-                                        <button class="user_id" value="{{$value->id}}">{{ ucwords($value->name )}}</button>
-                                    </div>
-                                @endforeach
+        <h3 class=" text-center">Messaging</h3>
+        <div class="messaging">
+            <div class="inbox_msg">
+                @if(auth()->user()->role == "1")
+                    <div class="inbox_people">
+                        <div class="headind_srch">
+                            <div class="recent_heading">
+                                <h4>Recent</h4>
                             </div>
-                            <input type="hidden" value="{{ auth()->user()->id  }}" class="sender_id">
-                            <div class="col-xs-6 col-md-8 right-section">
-                                <div class="sendMessage">
-                                    <div class="row message-list">
-                                        <div class="message">
-                                            <div class="current-user-chat">
-                                                <h5>hi</h5>
-                                            </div>
-                                        </div>
-                                        <input class="form-control message-box" type="text" name="message">
-                                        <button class="btn btn-primary send-button">Send</button>
-                                    </div>
+                            <div class="srch_bar">
+                                <div class="stylish-input-group">
+                                    <input type="text" class="search-bar" placeholder="Search">
+                                    <span class="input-group-addon">
+                                    <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
+                                </span>
                                 </div>
                             </div>
+                        </div>
+                        <div class="inbox_chat">
+                            @foreach($userData as $key => $value)
+                                <div class="chat_list" data-id="{{ $value->id }}">
+                                    <div class="chat_people">
+                                        <div class="chat_img">
+                                            <img src="{{ asset('images/user-profile.png') }}" alt="sunil">
+                                        </div>
+                                        <input type="hidden" value="{{ $value->id }}" class="user_id">
+                                        <input type="hidden" name="_token" id="token" class="token"
+                                               value="{{ csrf_token() }}">
+                                        <div class="chat_ib">
+                                            <h5 class="username">{{ ucwords($value->name) }} <span
+                                                        class="chat_date">Dec 25</span></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{--message box--}}
+                <div class="mesgs" style="{{ auth()->user()->role == "1" ? 'display: none' : 'display: block'  }}">
+                    {{--<div class="mesgs">--}}
+                    <div class="msg_history">
+
+                    </div>
+                    <div class="type_msg">
+                        <div class="input_msg_write">
+                            <input type="text" class="write_msg" placeholder="Type a message"/>
+                            <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
+                                                                          aria-hidden="true"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
+
+
+            <p class="text-center top_spac"> Design by
+                <a target="_blank" href="#">
+                    Darshan Belani
+                </a>
+            </p>
         </div>
     </div>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-
-    <script>
-        let reciver_id = "";
-        let sender_id = $(".sender_id").val();
-        $(document).on('click', '.user_id', function(e) {
-            reciver_id = $(".user_id").val()
-            console.log("reciver_id",reciver_id)
-        })
-        $(document).on('click', '.send-button', function(e) {
-            const message = {
-                "_token": "{{ csrf_token() }}",
-                sender_id: $(".sender_id").val(),
-                reciver_id: reciver_id,
-                message: $(".message-box").val(),
-            };
-            $.ajax({
-                url: '{{ route('chat.send') }}',
-                type: 'post',
-                data: message,
-                success: function(response){
-                    if(response.status == 200)
-                        var messageData = '<div class="current-user-chat">\n' +
-                            '              <h5>'+ message.message+'</h5>\n' +
-                            '          </div>';
-                    console.log("message", messageData)
-                    $('.message').append(messageData)
-                        // alert('Save successfully.');
-                }
-            });
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            Echo.private('brodcast-message')
-                .listen('.getChatMessage', (data) => {
-                    console.log('data', data)
-                    console.log("sender_id", sender_id)
-                    if (sender_id == data.chat.reciver_id && reciver_id == data.chat.sender_id)  {
-                        var messageData = '<div class="current-user-chat">\n' +
-                            '              <h5>'+ data.chat.message+'</h5>\n' +
-                            '          </div>';
-                        $('.message').append(messageData)
-                }
-
-                })
-        })
-        // window.Echo.private('brodcast-message')
-        //     .listen('.getChatMessage', (data) => {
-        //         console.log('data', data)
-        //     })
-    </script>
+    <script src="{{asset('js/custom.js')}}"></script>
 @endsection
+
+
+
